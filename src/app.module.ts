@@ -6,8 +6,9 @@ import { WalletModule } from './modules/wallet/wallet.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { TokenModule } from './modules/token/token.module';
 import { OffersModule } from './modules/offers/offers.module';
+import { StripeModule } from './modules/stripe/stripe.module';
 
 @Module({
-  imports: [PrismaModule, AuthModule, UsersModule, IdeasModule, WalletModule, TokenModule, OffersModule],
+  imports: [PrismaModule, AuthModule, UsersModule, IdeasModule, WalletModule, TokenModule, OffersModule, StripeModule],
 })
 export class AppModule {}

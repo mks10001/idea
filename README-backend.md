@@ -17,7 +17,17 @@ APIs (examples):
 - POST /api/ideas         { authorId, title, description }
 - GET  /api/ideas/:id
 - GET  /api/wallet/balance/:userId
+- GET  /api/token/balance/:userId
+
+Stripe integration (webhook testing):
+- Set STRIPE_SECRET_KEY and STRIPE_WEBHOOK_SECRET in .env
+- Use stripe-cli to forward webhooks locally:
+  stripe listen --forward-to localhost:3000/api/webhook/stripe
+- Trigger a test checkout completion:
+  stripe trigger checkout.session.completed
+- After receiving webhook, the backend will create/update StripeEvent, then credit SITE_TOKEN to the user based on metadata.tokenAmount.
 
 Notes:
 - This scaffold is intentionally minimal: authentication uses bcrypt + JWT, and Prisma is used for DB access.
-- Stripe webhook placeholder and KYC placeholders are to be implemented in later steps.
+- Stripe webhook endpoint requires raw request body for signature verification; the server enables raw body for /api/webhook/stripe.
+- In production, secure your JWT_SECRET and Stripe keys and run prisma migrate deploy as part of your CI/CD.

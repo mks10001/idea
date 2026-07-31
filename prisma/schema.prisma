@@ -109,3 +109,11 @@ model Audit {
   payload    Json?
   createdAt  DateTime @default(now())
 }
+
+model StripeEvent {
+  id          String   @id @default(uuid())
+  eventId     String   @unique
+  type        String
+  processedAt DateTime?
+  createdAt   DateTime @default(now())
+}
