@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Controller, Get, Param, Post, Body, NotFoundException } from '@nestjs/common';
 import { IdeasService } from './ideas.service';
 
 @Controller('api/ideas')
@@ -18,5 +18,13 @@ export class IdeasController {
   @Get(':id')
   async get(@Param('id') id: string) {
     return this.ideasService.get(id);
+  }
+
+  @Post(':id/approve')
+  async approve(@Param('id') id: string, @Body() body: any) {
+    // body may include adminId or reward override
+    const result = await this.ideasService.approve(id, body);
+    if (!result) throw new NotFoundException('Idea not found or already processed');
+    return result;
   }
 }
