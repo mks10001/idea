@@ -1,0 +1,111 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  passwordHash String
+  name         String?
+  role         String    @default("USER")
+  kycStatus    String    @default("PENDING")
+  createdAt    DateTime  @default(now())
+  profile      Profile?
+  ideas        Idea[]
+  wallets      Wallet[]
+  offers       Offer[]   @relation("InvestorOffers")
+}
+
+model Profile {
+  userId      String  @id
+  user        User    @relation(fields: [userId], references: [id])
+  bio         String?
+  contact     String?
+  attachments String?
+}
+
+model Idea {
+  id          String       @id @default(uuid())
+  authorId    String
+  author      User         @relation(fields: [authorId], references: [id])
+  title       String
+  description String?
+  attachments String?
+  status      String       @default("DRAFT")
+  targetAmount Float?
+  createdAt   DateTime     @default(now())
+  reviews     IdeaReview[]
+  offers      Offer[]
+}
+
+model IdeaReview {
+  id        String   @id @default(uuid())
+  ideaId    String
+  idea      Idea     @relation(fields: [ideaId], references: [id])
+  adminId   String?
+  admin     User?    @relation(fields: [adminId], references: [id])
+  decision  String
+  comment   String?
+  createdAt DateTime @default(now())
+}
+
+model Wallet {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  currencyType String
+  balance   Float    @default(0)
+  fromTx    TokenTransaction[] @relation("FromWallet")
+  toTx      TokenTransaction[] @relation("ToWallet")
+}
+
+model TokenTransaction {
+  id           String   @id @default(uuid())
+  fromWalletId String?
+  toWalletId   String?
+  fromWallet   Wallet?  @relation("FromWallet", fields: [fromWalletId], references: [id])
+  toWallet     Wallet?  @relation("ToWallet", fields: [toWalletId], references: [id])
+  amount       Float
+  type         String
+  status       String
+  meta         Json?
+  createdAt    DateTime @default(now())
+}
+
+model Offer {
+  id            String   @id @default(uuid())
+  ideaId        String
+  idea          Idea     @relation(fields: [ideaId], references: [id])
+  investorId    String
+  investor      User     @relation("InvestorOffers", fields: [investorId], references: [id])
+  offeredTokens Float?
+  offeredFiat   Float?
+  status        String   @default("PENDING")
+  createdAt     DateTime @default(now())
+  escrows       Escrow[]
+}
+
+model Escrow {
+  id                  String   @id @default(uuid())
+  offerId             String
+  offer               Offer    @relation(fields: [offerId], references: [id])
+  status              String   @default("PENDING")
+  stripePaymentIntent String?
+  lockedUntil         DateTime?
+  createdAt           DateTime @default(now())
+}
+
+model Audit {
+  id        String   @id @default(uuid())
+  entityType String
+  entityId   String
+  action     String
+  actorId    String?
+  payload    Json?
+  createdAt  DateTime @default(now())
+}
